@@ -1,0 +1,3 @@
+break sora::BasicFbdrv::mapping_graphics_memories()
+break sora::BasicFbdrv::write_fbdev_address(unsigned int, unsigned int)
+
