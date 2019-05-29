@@ -1,6 +1,5 @@
 #include "FrameBuffer.h"
-#include "FbProperties.h"
-#include "FbErrno.h"
+#include "BasicFbdrv.h"
 
 #include <unistd.h>
 #include <cstdio>
@@ -14,48 +13,60 @@ int main (int argc, char **argv)
     using namespace sora;
     using namespace cv;
 
-    BasicFbdrv drv;
-    /*
-    Mat frame = imread (argv[1]);
-    if (frame.empty ()) {
-        std::cerr << "Cannot open file!\n";
+    if (argc < 2) {
+        fprintf (stderr, "Too few arguments\n");
+        return EXIT_FAILURE;
+    }
 
+    try {
+        BasicFbdrv drv;
+        drv.request_signalval_interrupt (SIGINT);
+        /*
+        Mat frame = imread (argv[1]);
+        if (frame.empty ()) {
+            std::cerr << "Cannot open file!\n";
+
+            return 1;
+        }
+        */
+
+        VideoCapture capture (argv[1]);
+
+        Vec3b pixel;
+        Vec3b *line;
+        Mat frame;
+
+        while (true) {
+            capture >> frame;
+
+            for (int i = 0; i < frame.rows; i++) {
+                line = frame.ptr<Vec3b> (i);
+
+                for (int j = 0; j < frame.cols; j++) {
+                    pixel = line[j];
+
+                    drv.set_RGB_option (pixel[2], pixel[1], pixel[0]);
+                    drv.set_transp_option (0);
+                    try {
+                        drv.write_graphics_mem (j, i);
+                    } catch (int e) {
+                        continue;
+                    }
+
+                    // usleep (200);
+                    // drv.flush_screen ();
+                }
+                // std::cout << std::endl;
+            }
+        }
+
+        getchar ();
+        drv.flush_screen ();
+    
+    } catch (int e) {
+        printf ("An error: exception of instance \'int\' (errno %d)\n", e);
         return 1;
     }
-    */
-
-    VideoCapture capture (argv[1]);
-
-    Vec3b pixel;
-    Vec3b *line;
-    Mat frame;
-
-    while (true) {
-        capture >> frame;
-
-        for (int i = 0; i < frame.rows; i++) {
-            line = frame.ptr<Vec3b> (i);
-
-            for (int j = 0; j < frame.cols; j++) {
-                pixel = line[j];
-            
-                drv.set_RGB_option (pixel[2], pixel[1], pixel[0]);
-                drv.set_transp_option (0);
-                try {
-                    drv.write_graphics_mem (j, i);
-                } catch (int e) {
-                    continue;
-                }
-
-                // usleep (200);
-                // drv.flush_screen ();
-            }
-            // std::cout << std::endl;
-        }
-    }
-
-    getchar ();
-    drv.flush_screen ();
 
     /*
     int y, a, b;
