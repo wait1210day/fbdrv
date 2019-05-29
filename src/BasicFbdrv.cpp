@@ -75,7 +75,8 @@ BasicFbdrv::~BasicFbdrv ()
 }
 
 void BasicFbdrv::request_signalval_interrupt (int sigval) {
-    signal (sigval, this->sigval_interrupted);
+    // signal (sigval, this->sigval_interrupted);
+    std::cout << "Interrupted at: SIGINT\n";
 }
 
 void BasicFbdrv::sigval_interrupted (int sigval) {
